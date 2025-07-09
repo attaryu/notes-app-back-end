@@ -1,7 +1,8 @@
 {
   "name": "notes-app-back-end",
   "scripts": {
-    "start": "nodemon ./src/server",
+    "start": "node ./src/server",
+    "dev": "nodemon ./src/server",
     "test": "eslint ./src"
   },
   "devDependencies": {

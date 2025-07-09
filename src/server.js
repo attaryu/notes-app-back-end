@@ -1,6 +1,8 @@
 const Hapi = require('@hapi/hapi');
 const routes = require('./routes');
 
+const testPlugin = require('./plugins/test');
+
 const init = async () => {
   const server = Hapi.server({
     port: 5000,
@@ -11,6 +13,13 @@ const init = async () => {
   });
 
   server.route(routes);
+
+  await server.register({
+    plugin: testPlugin,
+    options: {
+      name: 'Hapi.js',
+    },
+  });
 
   await server.start();
   console.info(`server start on ${server.info.uri}`);
