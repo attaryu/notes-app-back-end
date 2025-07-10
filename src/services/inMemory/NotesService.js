@@ -63,7 +63,7 @@ class NotesService {
     const note = this._notes.find((n) => n.id === id);
 
     if (!note) {
-      throw new Error('Note not found');
+      throw new Error('Catatan tidak ditemukan');
     }
 
     return note;
@@ -96,7 +96,7 @@ class NotesService {
       updatedAt: new Date().toISOString(),
     };
 
-    return existingNote.id;
+    return this._notes[existingNoteIndex].id;
   }
 
   /**

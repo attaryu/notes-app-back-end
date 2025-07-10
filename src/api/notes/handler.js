@@ -42,7 +42,7 @@ class NoteHandler {
 
       const response = h.response({
         status: 'success',
-        message: 'Note added successfully',
+        message: 'Catatan berhasil ditambahkan',
         data: {
           noteId,
         },
@@ -106,7 +106,7 @@ class NoteHandler {
 
       return {
         status: 'success',
-        message: 'Note updated successfully',
+        message: 'Catatan berhasil diperbarui',
       };
     } catch (error) {
       const response = h.response({
@@ -134,7 +134,7 @@ class NoteHandler {
 
       return {
         status: 'success',
-        message: 'Note deleted successfully',
+        message: 'Catatan berhasil dihapus',
       };
     } catch (error) {
       const response = h.response({
