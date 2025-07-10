@@ -1,0 +1,145 @@
+/**
+ * NoteHandler class to manage note-related operations
+ */
+class NoteHandler {
+  constructor(service) {
+    this._service = service;
+  }
+
+  /**
+   * Handler to get all notes
+   * 
+   * @returns {Object} Response object containing status and notes data
+   */
+  getNotesHandler() {
+    return {
+      status: 'success',
+      data: {
+        notes: this._service.getNotes(),
+      },
+    }
+  }
+
+  /**
+   * Handler to add a new note
+   * 
+   * @param {Object} request - The request object containing payload
+   * @param {Object} h - The response toolkit
+   * 
+   * @return {Object} Response object containing status and noteId
+   */
+  postNoteHandler(request, h) {
+    try {
+      const { title = 'Untitled', body, tags } = request.payload;
+
+      const noteId = this._service.addNote({ title, body, tags });
+
+      const response = h.response({
+        status: 'success',
+        message: 'Note added successfully',
+        data: {
+          noteId,
+        },
+      });
+      response.code(201);
+
+      return response;
+    } catch (error) {
+      const reponse = h.response({
+        status: 'fail',
+        message: error.message,
+      });
+      reponse.code(400);
+
+      return reponse;
+    }
+  }
+
+  /**
+   * Handler to get a note by its ID
+   * 
+   * @param {Object} request - The request object containing params
+   * @param {Object} h - The response toolkit
+   * 
+   * @return {Object} Response object containing status and note data
+   */
+  getNoteByIdHandler(request, h) {
+    try {
+      const { id } = request.params;
+
+      return {
+        status: 'success',
+        data: {
+          note: this._service.getNoteById(id),
+        },
+      }
+    } catch (error) {
+      const response = h.response({
+        status: 'fail',
+        message: error.message,
+      });
+      response.code(404);
+
+      return response;
+    }
+  }
+
+  /**
+   * Handler to update a note by its ID
+   * 
+   * @param {Object} request - The request object containing params and payload
+   * @param {Object} h - The response toolkit
+   * 
+   * @return {Object} Response object containing status and message
+   */
+  putNoteByIdHandler(request, h) {
+    try {
+      const { id } = request.params;
+
+      this._service.editNoteById(id, request.payload);
+
+      return {
+        status: 'success',
+        message: 'Note updated successfully',
+      };
+    } catch (error) {
+      const response = h.response({
+        status: 'fail',
+        message: error.message,
+      });
+      response.code(404);
+
+      return response;
+    }
+  }
+
+  /**
+   * Handler to delete a note by its ID
+   * 
+   * @param {Object} request - The request object containing params
+   * @param {Object} h - The response toolkit
+   * 
+   * @return {Object} Response object containing status and message
+   */
+  deleteNoteByIdHandler(request, h) {
+    try {
+      const { id } = request.params;
+      this._service.deleteNoteById(id);
+
+      return {
+        status: 'success',
+        message: 'Note deleted successfully',
+      };
+    } catch (error) {
+      const response = h.response({
+        status: 'fail',
+        message: error.message,
+      });
+      response.code(404);
+
+      return response;
+    }
+  }
+}
+
+module.exports = NoteHandler;
