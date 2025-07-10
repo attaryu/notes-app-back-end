@@ -1,10 +1,14 @@
+const path = require('node:path');
 const Hapi = require('@hapi/hapi');
+const vision = require('@hapi/vision');
+const Handlebars = require('handlebars');
 
 const notes = require('./api/notes');
 
 const NotesService = require('./services/inMemory/NotesService');
 
 const testPlugin = require('./plugins/test');
+const templatePlugin = require('./plugins/template');
 
 const init = async () => {
   const server = Hapi.server({
@@ -15,6 +19,16 @@ const init = async () => {
     },
   });
 
+  await server.register(vision);
+
+  server.views({
+    engines: {
+      hbs: Handlebars,
+    },
+    path: path.join(__dirname, 'views'),
+  })
+
+  // routing
   await server.register([
     {
       plugin: notes,
@@ -22,12 +36,19 @@ const init = async () => {
         service: new NotesService(),
       },
     },
+  ]);
+
+  // plugin
+  await server.register([
     {
       plugin: testPlugin,
       options: {
         name: 'Hapi.js',
       },
-    }
+    },
+    {
+      plugin: templatePlugin,
+    },
   ]);
 
   await server.start();
