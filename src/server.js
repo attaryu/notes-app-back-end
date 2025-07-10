@@ -1,5 +1,8 @@
 const Hapi = require('@hapi/hapi');
-const routes = require('./routes');
+
+const notes = require('./api/notes');
+
+const NotesService = require('./services/inMemory/NotesService');
 
 const testPlugin = require('./plugins/test');
 
@@ -12,16 +15,23 @@ const init = async () => {
     },
   });
 
-  server.route(routes);
-
-  await server.register({
-    plugin: testPlugin,
-    options: {
-      name: 'Hapi.js',
+  await server.register([
+    {
+      plugin: notes,
+      options: {
+        service: new NotesService(),
+      },
     },
-  });
+    {
+      plugin: testPlugin,
+      options: {
+        name: 'Hapi.js',
+      },
+    }
+  ]);
 
   await server.start();
+
   console.info(`server start on ${server.info.uri}`);
 };
 
