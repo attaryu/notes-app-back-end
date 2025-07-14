@@ -6,6 +6,7 @@ const Handlebars = require('handlebars');
 const notes = require('./api/notes');
 
 const NotesService = require('./services/inMemory/NotesService');
+const NoteValidator = require('./validator/notes');
 
 const testPlugin = require('./plugins/test');
 const templatePlugin = require('./plugins/template');
@@ -34,6 +35,7 @@ const init = async () => {
       plugin: notes,
       options: {
         service: new NotesService(),
+        validator: NoteValidator,
       },
     },
   ]);

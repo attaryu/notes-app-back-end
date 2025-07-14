@@ -1,9 +1,12 @@
+const ClientError = require('../../exceptions/ClientError');
+
 /**
  * NoteHandler class to manage note-related operations
  */
 class NoteHandler {
-  constructor(service) {
+  constructor(service, validator) {
     this._service = service;
+    this._validator = validator;
 
     this.getNotesHandler = this.getNotesHandler.bind(this);
     this.postNoteHandler = this.postNoteHandler.bind(this);
@@ -17,7 +20,7 @@ class NoteHandler {
    * 
    * @returns {Object} Response object containing status and notes data
    */
-  getNotesHandler() {    
+  getNotesHandler() {
     return {
       status: 'success',
       data: {
@@ -36,8 +39,9 @@ class NoteHandler {
    */
   postNoteHandler(request, h) {
     try {
-      const { title = 'Untitled', body, tags } = request.payload;
+      this._validator.validateNotePayload(request.payload);
 
+      const { title = 'Untitled', body, tags } = request.payload;
       const noteId = this._service.addNote({ title, body, tags });
 
       const response = h.response({
@@ -51,11 +55,21 @@ class NoteHandler {
 
       return response;
     } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
+
       const reponse = h.response({
-        status: 'fail',
-        message: error.message,
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
       });
-      reponse.code(400);
+      reponse.code(500);
+      console.error(error);
 
       return reponse;
     }
@@ -80,13 +94,23 @@ class NoteHandler {
         },
       }
     } catch (error) {
-      const response = h.response({
-        status: 'fail',
-        message: error.message,
-      });
-      response.code(404);
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
 
-      return response;
+      const reponse = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      reponse.code(500);
+      console.error(error);
+
+      return reponse;
     }
   }
 
@@ -100,6 +124,8 @@ class NoteHandler {
    */
   putNoteByIdHandler(request, h) {
     try {
+      this._validator.validateNotePayload(request.payload);
+
       const { id } = request.params;
 
       this._service.editNoteById(id, request.payload);
@@ -109,13 +135,23 @@ class NoteHandler {
         message: 'Catatan berhasil diperbarui',
       };
     } catch (error) {
-      const response = h.response({
-        status: 'fail',
-        message: error.message,
-      });
-      response.code(404);
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
 
-      return response;
+      const reponse = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      reponse.code(500);
+      console.error(error);
+
+      return reponse;
     }
   }
 
@@ -137,13 +173,23 @@ class NoteHandler {
         message: 'Catatan berhasil dihapus',
       };
     } catch (error) {
-      const response = h.response({
-        status: 'fail',
-        message: error.message,
-      });
-      response.code(404);
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+        response.code(error.statusCode);
+        return response;
+      }
 
-      return response;
+      const reponse = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+      reponse.code(500);
+      console.error(error);
+
+      return reponse;
     }
   }
 }

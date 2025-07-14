@@ -1,5 +1,8 @@
 const { nanoid } = require('nanoid');
 
+const InvariantError = require('../../exceptions/InvariantError');
+const NotFoundError = require('../../exceptions/NotFoundError');
+
 /**
  * A service for managing notes in memory. This class provides methods to add, 
  * retrieve, edit, and delete notes.
@@ -36,7 +39,7 @@ class NotesService {
     const isSuccess = this._notes.find((note) => note.id === id);
 
     if (!isSuccess) {
-      throw new Error('Note failed to add');
+      throw new InvariantError('Catatan gagal ditambahkan');
     }
 
     return id;
@@ -63,7 +66,7 @@ class NotesService {
     const note = this._notes.find((n) => n.id === id);
 
     if (!note) {
-      throw new Error('Catatan tidak ditemukan');
+      throw new NotFoundError('Catatan tidak ditemukan');
     }
 
     return note;
@@ -85,7 +88,7 @@ class NotesService {
     const existingNoteIndex = this._notes.findIndex((note) => note.id === id);
 
     if (existingNoteIndex === -1) {
-      throw new Error('Note edit failed, id not found');
+      throw new NotFoundError('Catatan tidak ditemukan');
     }
 
     this._notes[existingNoteIndex] = {
@@ -111,7 +114,7 @@ class NotesService {
     const existingNoteIndex = this._notes.findIndex((note) => note.id === id);
 
     if (existingNoteIndex === -1) {
-      throw new Error('Note delete found, id not found');
+      throw new NotFoundError('Catatan tidak ditemukan');
     }
 
     this._notes.splice(existingNoteIndex, 1);
