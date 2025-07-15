@@ -11,6 +11,8 @@ const NoteValidator = require('./validator/notes');
 const testPlugin = require('./plugins/test');
 const templatePlugin = require('./plugins/template');
 
+const ClientError = require('./exceptions/ClientError');
+
 const init = async () => {
   const server = Hapi.server({
     port: 5000,
@@ -52,6 +54,22 @@ const init = async () => {
       plugin: templatePlugin,
     },
   ]);
+
+  server.ext('onPreResponse', (request, h) => {
+    const { response } = request;
+
+    if (response instanceof ClientError) {
+      const newResponse = h.response({
+        status: 'fail',
+        message: response.message,
+      });
+      newResponse.code(response.statusCode);
+
+      return newResponse;
+    }
+
+    return h.continue;
+  });
 
   await server.start();
 
