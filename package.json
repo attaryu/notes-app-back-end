@@ -3,7 +3,8 @@
   "scripts": {
     "start": "node ./src/server",
     "dev": "nodemon ./src/server",
-    "test": "eslint ./src"
+    "test": "eslint ./src",
+    "migrate": "node-pg-migrate"
   },
   "devDependencies": {
     "eslint": "^9.30.1",
@@ -18,6 +19,7 @@
     "handlebars": "^4.7.8",
     "joi": "^17.13.3",
     "nanoid": "^3.3.4",
+    "node-pg-migrate": "^8.0.3",
     "pg": "^8.16.3"
   },
   "version": "1.0.0",
