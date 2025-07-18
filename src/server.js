@@ -7,7 +7,7 @@ const Handlebars = require('handlebars');
 
 const notes = require('./api/notes');
 
-const NotesService = require('./services/inMemory/NotesService');
+const NotesService = require('./services/postgres/NotesService');
 const NoteValidator = require('./validator/notes');
 
 const testPlugin = require('./plugins/test');

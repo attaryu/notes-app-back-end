@@ -1,0 +1,127 @@
+const { nanoid } = require('nanoid');
+const { Pool } = require('pg');
+
+const InvariantError = require('../../exceptions/InvariantError');
+
+const { mapDBToModel } = require('../../utils');
+const NotFoundError = require('../../exceptions/NotFoundError');
+
+class NoteService {
+  constructor() {
+    this._pool = new Pool();
+  }
+
+  /**
+   * Adds a new note to the postgres db.
+   * 
+   * @param {Object} note - The note to add.
+   * @param {string} note.title - The title of the note.
+   * @param {string} note.body - The body of the note.
+   * @param {Array} note.tags - The tags associated with the note.
+   * 
+   * @throws {Error} If the note fails to add.
+   * @returns {string} The ID of the newly added note.
+   */
+  async addNote({ title, body, tags }) {
+    const id = nanoid(16);
+    const createdAt = new Date().toISOString();
+    const updatedAt = createdAt;
+
+    const query = {
+      text: 'INSERT INTO notes VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+      values: [id, title, body, tags, createdAt, updatedAt],
+    }
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows[0].id) {
+      throw new InvariantError('Catatan gagal ditambahkan');
+    }
+
+    return result.rows[0].id;
+  }
+
+  /**
+   * gets all notes from the postgres db.
+   * 
+   * @returns {Array} An array of all notes in the postgres db.
+   */
+  async getNotes() {
+    const result = await this._pool.query('SELECT * FROM notes');
+    return result.rows.map(mapDBToModel);
+  }
+
+  /**
+   * Retrieves a note by its ID from the postgres db.
+   * 
+   * @param {string} id - The ID of the note to retrieve.
+   * 
+   * @throws {Error} If the note with the specified ID is not found.
+   * @return {Object} The note with the specified ID.
+   */
+  async getNoteById(id) {
+    const query = {
+      text: 'SELECT * FROM notes WHERE id = $1',
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Catatan tidak ditemukan');
+    }
+
+    return result.rows.map(mapDBToModel)[0];
+  }
+
+  /**
+   * Edits a note by its ID in the in-memory store.
+   * 
+   * @param {string} id - The ID of the note to edit.
+   * @param {Object} note - The updated note data.
+   * @param {string} note.title - The new title of the note.
+   * @param {string} note.body - The new body of the note.
+   * @param {Array} note.tags - The new tags associated with the note.
+   * 
+   * @throws {Error} If the note with the specified ID is not found.
+   * @return {string} The ID of the edited note.
+   */
+  async editNoteById(id, { title, body, tags }) {
+    const updatedAt = new Date().toISOString();
+    const query = {
+      text: 'UPDATE notes SET title = $1, body = $2, tags = $3, updated_at = $4 WHERE id = $5 RETURNING id',
+      values: [title, body, tags, updatedAt, id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Gagal memperbarui catatan. Id tidak ditemukan');
+    }
+
+    return result.rows.map(mapDBToModel)[0].id;
+  }
+
+  /**
+   * Deletes a note by its ID from the in-memory store.
+   * 
+   * @param {string} id - The ID of the note to delete.
+   * 
+   * @throws {Error} If the note with the specified ID is not found.
+   * @return {void}
+   */
+  async deleteNoteById(id) {
+    const query = {
+      text: 'DELETE FROM notes WHERE id = $1 RETURNING id',
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Catatan gagal dihapus. Id tidak ditemukan');
+    }
+  }
+}
+
+module.exports = NoteService;

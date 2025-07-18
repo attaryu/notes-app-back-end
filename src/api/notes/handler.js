@@ -18,11 +18,11 @@ class NoteHandler {
    * 
    * @returns {Object} Response object containing status and notes data
    */
-  getNotesHandler() {
+  async getNotesHandler() {
     return {
       status: 'success',
       data: {
-        notes: this._service.getNotes(),
+        notes: await this._service.getNotes(),
       },
     }
   }
@@ -35,11 +35,11 @@ class NoteHandler {
    * 
    * @return {Object} Response object containing status and noteId
    */
-  postNoteHandler(request, h) {
+  async postNoteHandler(request, h) {
     this._validator.validateNotePayload(request.payload);
 
     const { title = 'Untitled', body, tags } = request.payload;
-    const noteId = this._service.addNote({ title, body, tags });
+    const noteId = await this._service.addNote({ title, body, tags });
 
     const response = h.response({
       status: 'success',
@@ -61,13 +61,13 @@ class NoteHandler {
    * 
    * @return {Object} Response object containing status and note data
    */
-  getNoteByIdHandler(request, h) {
+  async getNoteByIdHandler(request, h) {
     const { id } = request.params;
 
     return {
       status: 'success',
       data: {
-        note: this._service.getNoteById(id),
+        note: await this._service.getNoteById(id),
       },
     }
   }
@@ -80,12 +80,12 @@ class NoteHandler {
    * 
    * @return {Object} Response object containing status and message
    */
-  putNoteByIdHandler(request, h) {
+  async putNoteByIdHandler(request, h) {
     this._validator.validateNotePayload(request.payload);
 
     const { id } = request.params;
 
-    this._service.editNoteById(id, request.payload);
+    await this._service.editNoteById(id, request.payload);
 
     return {
       status: 'success',
@@ -101,9 +101,9 @@ class NoteHandler {
    * 
    * @return {Object} Response object containing status and message
    */
-  deleteNoteByIdHandler(request, h) {
+  async deleteNoteByIdHandler(request, h) {
     const { id } = request.params;
-    this._service.deleteNoteById(id);
+    await this._service.deleteNoteById(id);
 
     return {
       status: 'success',
