@@ -5,11 +5,6 @@ const Hapi = require('@hapi/hapi');
 const vision = require('@hapi/vision');
 const Handlebars = require('handlebars');
 
-const notes = require('./api/notes');
-
-const NotesService = require('./services/postgres/NotesService');
-const NoteValidator = require('./validator/notes');
-
 const testPlugin = require('./plugins/test');
 const templatePlugin = require('./plugins/template');
 
@@ -38,10 +33,17 @@ const init = async () => {
   // routing
   await server.register([
     {
-      plugin: notes,
+      plugin: require('./api/notes'),
       options: {
-        service: new NotesService(),
-        validator: NoteValidator,
+        service: new (require('./services/postgres/NotesService'))(),
+        validator: require('./validator/notes'),
+      },
+    },
+    {
+      plugin: require('./api/users'),
+      options: {
+        service: new (require('./services/postgres/UsersService'))(),
+        validator: require('./validator/users'),
       },
     },
   ]);
