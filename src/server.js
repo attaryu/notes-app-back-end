@@ -30,6 +30,8 @@ const init = async () => {
     path: path.join(__dirname, 'views'),
   })
 
+  const usersService = new (require('./services/postgres/UsersService'))()
+
   // routing
   await server.register([
     {
@@ -42,8 +44,17 @@ const init = async () => {
     {
       plugin: require('./api/users'),
       options: {
-        service: new (require('./services/postgres/UsersService'))(),
+        service: usersService,
         validator: require('./validator/users'),
+      },
+    },
+    {
+      plugin: require('./api/authentications'),
+      options: {
+        authenticationsService: new (require('./services/postgres/AuthenticationsService'))(),
+        usersService,
+        tokenManager: require('./tokenize/TokenManager'),
+        validator: require('./validator/authentications'),
       },
     },
   ]);
