@@ -3,6 +3,7 @@ require('dotenv').config();
 const path = require('node:path');
 const Hapi = require('@hapi/hapi');
 const vision = require('@hapi/vision');
+const Jwt = require('@hapi/jwt');
 const Handlebars = require('handlebars');
 
 const testPlugin = require('./plugins/test');
@@ -32,6 +33,54 @@ const init = async () => {
 
   const usersService = new (require('./services/postgres/UsersService'))()
 
+  // plugin
+  await server.register([
+    {
+      plugin: testPlugin,
+      options: {
+        name: 'Hapi.js',
+      },
+    },
+    {
+      plugin: templatePlugin,
+    },
+    {
+      plugin: Jwt,
+    },
+  ]);
+
+  server.auth.strategy('notesapp_jwt', 'jwt', {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id,
+      },
+    }),
+  })
+
+  server.ext('onPreResponse', (request, h) => {
+    const { response } = request;
+
+    if (response instanceof ClientError) {
+      const newResponse = h.response({
+        status: 'fail',
+        message: response.message,
+      });
+      newResponse.code(response.statusCode);
+
+      return newResponse;
+    }
+
+    return h.continue;
+  });
+  
   // routing
   await server.register([
     {
@@ -58,35 +107,6 @@ const init = async () => {
       },
     },
   ]);
-
-  // plugin
-  await server.register([
-    {
-      plugin: testPlugin,
-      options: {
-        name: 'Hapi.js',
-      },
-    },
-    {
-      plugin: templatePlugin,
-    },
-  ]);
-
-  server.ext('onPreResponse', (request, h) => {
-    const { response } = request;
-
-    if (response instanceof ClientError) {
-      const newResponse = h.response({
-        status: 'fail',
-        message: response.message,
-      });
-      newResponse.code(response.statusCode);
-
-      return newResponse;
-    }
-
-    return h.continue;
-  });
 
   await server.start();
 
