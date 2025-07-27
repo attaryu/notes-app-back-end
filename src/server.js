@@ -31,8 +31,7 @@ const init = async () => {
     path: path.join(__dirname, 'views'),
   })
 
-  const usersService = new (require('./services/postgres/UsersService'))()
-
+  
   // plugin
   await server.register([
     {
@@ -80,13 +79,17 @@ const init = async () => {
 
     return h.continue;
   });
+
+  const usersService = new (require('./services/postgres/UsersService'))();
+  const collaborationsService = new (require('./services/postgres/CollaborationsService'))()
+  const notesService = new (require('./services/postgres/NotesService'))(collaborationsService);
   
   // routing
   await server.register([
     {
       plugin: require('./api/notes'),
       options: {
-        service: new (require('./services/postgres/NotesService'))(),
+        service: notesService,
         validator: require('./validator/notes'),
       },
     },
@@ -104,6 +107,14 @@ const init = async () => {
         usersService,
         tokenManager: require('./tokenize/TokenManager'),
         validator: require('./validator/authentications'),
+      },
+    },
+    {
+      plugin: require('./api/collaborations'),
+      options: {
+        collaborationsService,
+        notesService,
+        validator: require('./validator/collaborations'),
       },
     },
   ]);

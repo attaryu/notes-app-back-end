@@ -69,7 +69,7 @@ class NoteHandler {
     const { id } = request.params;
     const { id: owner } = request.auth.credentials;
 
-    await this._service.verifyNoteOwner(id, owner);
+    await this._service.verifyNoteAccess(id, owner);
 
     return {
       status: 'success',
@@ -93,7 +93,7 @@ class NoteHandler {
     const { id } = request.params;
     const { id: owner } = request.auth.credentials;
 
-    await this._service.verifyNoteOwner(id, owner);
+    await this._service.verifyNoteAccess(id, owner);
     await this._service.editNoteById(id, request.payload);
 
     return {
