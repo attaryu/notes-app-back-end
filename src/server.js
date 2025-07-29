@@ -31,7 +31,6 @@ const init = async () => {
     path: path.join(__dirname, 'views'),
   })
 
-  
   // plugin
   await server.register([
     {
@@ -115,6 +114,13 @@ const init = async () => {
         collaborationsService,
         notesService,
         validator: require('./validator/collaborations'),
+      },
+    },
+    {
+      plugin: require('./api/exports'),
+      options: {
+        service: require('./services/rabbitmq/ProducerService'),
+        validator: require('./validator/exports'),
       },
     },
   ]);
