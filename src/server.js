@@ -77,9 +77,10 @@ const init = async () => {
     return h.continue;
   });
 
+  const cacheStorage = new (require('./services/redis/CacheService'))();
   const usersService = new (require('./services/postgres/UsersService'))();
-  const collaborationsService = new (require('./services/postgres/CollaborationsService'))()
-  const notesService = new (require('./services/postgres/NotesService'))(collaborationsService);
+  const collaborationsService = new (require('./services/postgres/CollaborationsService'))(cacheStorage)
+  const notesService = new (require('./services/postgres/NotesService'))(collaborationsService, cacheStorage);
 
   // routing
   await server.register([
