@@ -82,7 +82,7 @@ const init = async () => {
   const usersService = new (require('./services/postgres/UsersService'))();
   const collaborationsService = new (require('./services/postgres/CollaborationsService'))()
   const notesService = new (require('./services/postgres/NotesService'))(collaborationsService);
-  
+
   // routing
   await server.register([
     {
@@ -121,6 +121,15 @@ const init = async () => {
       options: {
         service: require('./services/rabbitmq/ProducerService'),
         validator: require('./validator/exports'),
+      },
+    },
+    {
+      plugin: require('./api/uploads'),
+      options: {
+        service: new (require('./services/storage/StorageService'))(
+          path.resolve(__dirname, 'api/uploads/file/images')
+        ),
+        validator: require('./validator/uploads'),
       },
     },
   ]);
