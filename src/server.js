@@ -4,6 +4,7 @@ const path = require('node:path');
 const Hapi = require('@hapi/hapi');
 const vision = require('@hapi/vision');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
 const Handlebars = require('handlebars');
 
 const testPlugin = require('./plugins/test');
@@ -39,12 +40,9 @@ const init = async () => {
         name: 'Hapi.js',
       },
     },
-    {
-      plugin: templatePlugin,
-    },
-    {
-      plugin: Jwt,
-    },
+    { plugin: templatePlugin },
+    { plugin: Jwt },
+    { plugin: Inert },
   ]);
 
   server.auth.strategy('notesapp_jwt', 'jwt', {

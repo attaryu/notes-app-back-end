@@ -1,3 +1,8 @@
+const path = require('node:path');
+
+/**
+ * @returns {import('@hapi/hapi').ServerRoute[]}
+ */
 const routes = (handler) => [
   {
     method: 'POST',
@@ -10,7 +15,16 @@ const routes = (handler) => [
         output: 'stream',
       }
     }
-  }
+  },
+  {
+    method: 'GET',
+    path: '/upload/{param*}',
+    handler: {
+      directory: {
+        path: path.resolve(__dirname, 'file'),
+      },
+    },
+  },
 ];
 
 module.exports = routes;
